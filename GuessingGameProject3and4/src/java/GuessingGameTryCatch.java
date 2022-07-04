@@ -76,7 +76,8 @@ public class GuessingGameTryCatch {
     public void playGame() {
         String option;
         boolean valid = false;
-        setSystemGuess();
+        int randSeed = (int) Math.floor(Math.random() * 20);
+        setSystemGuess(randSeed);
         welcomeMessage();
         guessAgain();
         while (!valid) {
@@ -119,16 +120,16 @@ public class GuessingGameTryCatch {
      * Setter for the system guess.
      */
 
-    public void setSystemGuess() {
-        systemGuess = (int) Math.floor(Math.random() * 20);
+    public void setSystemGuess(int randSeed) {
+        systemGuess = randSeed;
     }
-/*
+
      public static void main(String args[]){
         GuessingGameTryCatch guessingGameTryCatch = new GuessingGameTryCatch();
         guessingGameTryCatch.playGame();
      }
-     */
- */
+
+
 }
 
 
