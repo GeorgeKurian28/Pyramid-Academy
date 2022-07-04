@@ -108,8 +108,8 @@ public class DragonGameTryCatch {
      *
      */
     public static void main(String ... args){
-        DragonGameTryCatch dragonGameJUnitTesting = new DragonGameTryCatch();
-        dragonGameJUnitTesting.playGame();
+        DragonGameTryCatch dragonGame = new DragonGameTryCatch();
+        dragonGame.playGame();
     }
 
 }
