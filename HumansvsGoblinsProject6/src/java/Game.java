@@ -217,7 +217,7 @@ public class Game {
         if(Math.random() > 0.5)
             humanAttack = false;
         if(humanAttack)
-            human.attackGoblin(goblin);
+            goblin = human.attackGoblin(goblin);
         else
             goblin.attackHuman(human);
         if(human.getHealth() <=0 )

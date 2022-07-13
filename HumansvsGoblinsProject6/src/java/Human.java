@@ -14,7 +14,7 @@ public class Human {
     private int positionX = 0, positionY = 0;
 
     /*************
-     * The GetID methid return the Id of the human
+     * The GetID methid return the Id of the human(Getter)
      *
      * @return returns the Integer value which is the Id of the human
      */
@@ -23,27 +23,59 @@ public class Human {
     /*****
      * The two argument constructor for the Human object
      *
-     * The ID and health are fixed but can be modified as needed
+     * This calls the constructor with three arguments
      */
     public Human(int positionX, int positionY){
-        iD = cnt ++;
-        health = 110;
+        this(positionX,positionY,cnt++);//calls the 3 argument constructor
+    }
+
+    /*****
+     * The three argument constructor for the Human object
+     *
+     * This calls the four argument constructor
+     */
+    public Human(int positionX, int positionY, int iD){
+        this(positionX,positionY,iD,110);//calls the 4 argument constructor
+    }
+
+    /*****
+     * The four argument constructor for the Human object
+     *
+     */
+    public Human(int positionX, int positionY, int health, int iD){
+        this.iD = iD;
+        this.health = health;
         this.positionX = positionX;
         this.positionY = positionY;
     }
-
-    public void attackGoblin(Goblin goblin){
+    
+    /*****
+     * The attackGoblin method takes the Goblin object and compares the health og the goblin and the human, and the attack is based on their health
+     *
+     * @return The goblin object is returned at a different state than what it came in if it was weaker than the human
+     */
+    public Goblin attackGoblin(Goblin goblin){
         if(getHealth() > goblin.getHealth()) {
             goblin.setHealth(goblin.getHealth() - 10);
         }
         else
             setHealth(getHealth()-5);
+        return goblin;
     }
 
+    /*************
+     * The Getter method getHealth() returns the health of the human
+     *
+     * @return returns the Integer value of the health of the human
+     */
     public int getHealth(){
         return health;
     }
 
+    /*************
+     * The Setter method setHealth() returns the health of the human, takes a integer value helath that updates the health
+     *
+     */
     public void setHealth(int health){
         if(this.health > 0)
             this.health = health;
@@ -71,6 +103,11 @@ public class Human {
         return position;
     }
 
+    /*************
+     * The Getter method isDead() returns if the human is dead or alive
+     *
+     * @return returns the boolean value true if the human is dead
+     */
     public boolean isDead(){
         return getHealth() <= 0;
     }
