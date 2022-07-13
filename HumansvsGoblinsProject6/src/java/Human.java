@@ -91,11 +91,11 @@ public class Human {
      * @param -positionY   - int the Y position coordinate
      */
     public void setPosition (int  positionX, int positionY, int[] matrix){
-        if (positionX > 0  && positionX < matrix[0])
+        if (positionX >= 0  && positionX < matrix[0])
             this.positionX = positionX;
         else
             throw new IllegalArgumentException("Position X has to be greater than 0  and less than "+ matrix[0]);
-        if (positionY > 0  && positionY < matrix[1])
+        if (positionY >= 0  && positionY < matrix[1])
             this.positionY = positionY;
         else
             throw new IllegalArgumentException("Position Y has to be greater than 0  and less than "+ matrix[1]);
