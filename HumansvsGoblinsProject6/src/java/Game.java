@@ -85,7 +85,7 @@ public class Game {
 
         if(land.getGridMatrix()[gPos[0]][gPos[1]] == 0) {
             land.setGridMatrixValue(goblin.getPosition(),0);
-            goblin.setPosition(gPos[0], gPos[1]);
+            goblin.setPosition(gPos[0], gPos[1], land.getGridSize());
             //System.out.println(goblin);TO BE REMOVED
         }
     }
@@ -219,7 +219,7 @@ public class Game {
         if(humanAttack)
             goblin = human.attackGoblin(goblin);
         else
-            goblin.attackHuman(human);
+            human = goblin.attackHuman(human);
         if(human.getHealth() <=0 )
             land.setGridMatrixValue(human.getPosition(),0);
         if(goblin.getHealth() <=0 )

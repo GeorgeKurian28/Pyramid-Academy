@@ -102,7 +102,7 @@ public class Human {
     }
 
     /******
-     * Getter for the position variables they take two values and return two values
+     * Getter for the position variables that returns two values
      *
      * @param -position     - int[] the postion coordinates
      * @return returns the potion arrat with the X yariable at index 0 and the Y variable at index 1
