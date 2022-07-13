@@ -77,7 +77,7 @@ public class Human {
      *
      */
     public void setHealth(int health){
-        if(this.health > 0)//only if the human is alive we can improve his health
+        if(this.health > 0 & health > 0)//only if the human is alive we can improve his health
             this.health = health;
         else
             this.health = 0;//The human is dead so the health will always be 0
