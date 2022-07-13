@@ -12,12 +12,34 @@ public class Goblin {
         return iD;
     }
 
+    /*****
+     * The two argument constructor for the Goblin object
+     *
+     * This calls the constructor with three arguments
+     */
     public Goblin(int positionX, int positionY) {
-        iD = cnt++;
-        health = 100;
-        this.positionX = positionX;
-        this.positionY = positionY;
+        this(positionX,positionY,cnt++);
     }
+
+    /*****
+     * The three argument constructor for the Goblin object
+     *
+     * This calls the four argument constructor
+     */
+     public Goblin(int positionX, int positionY, int iD){
+         this(positionX,positionY,iD,100);
+     }
+
+    /*****
+     * The four argument constructor for the Goblin object
+     *
+     */
+     public Goblin(int positionX,int positionY, int iD, int health){
+         this.iD = iD;
+         this.health = health;
+         this.positionX = positionX;
+         this.positionY = positionY;
+     }
 
     public void attackHuman(Human human){
         if(getHealth() > human.getHealth()) {
@@ -36,7 +58,7 @@ public class Goblin {
      * @param -positionX   - int the X potion coordinate
      * @param -positionY   - int the Y position coordinate
      */
-    public void setPostion(int  positionX, int positionY){
+    public void setPosition(int  positionX, int positionY){
         this.positionX = positionX;
         this.positionY = positionY;
     }

@@ -85,7 +85,7 @@ public class Game {
 
         if(land.getGridMatrix()[gPos[0]][gPos[1]] == 0) {
             land.setGridMatrixValue(goblin.getPosition(),0);
-            goblin.setPostion(gPos[0], gPos[1]);
+            goblin.setPosition(gPos[0], gPos[1]);
             //System.out.println(goblin);TO BE REMOVED
         }
     }
@@ -146,7 +146,7 @@ public class Game {
         }
         //if it is same creature we cant kill, if it is different creature call attack command this will update the group
         land.setGridMatrixValue(human.getPosition(),0);
-        human.setPostion(newPos[0],newPos[1]);
+        human.setPosition(newPos[0],newPos[1],land.getGridSize());
         land.setGridMatrixValue(human.getPosition(),human.getiD());
     }
 

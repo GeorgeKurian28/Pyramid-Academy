@@ -13,13 +13,6 @@ public class Human {
     private int iD;
     private int positionX = 0, positionY = 0;
 
-    /*************
-     * The GetID methid return the Id of the human(Getter)
-     *
-     * @return returns the Integer value which is the Id of the human
-     */
-    public int getiD(){  return iD;    }
-
     /*****
      * The two argument constructor for the Human object
      *
@@ -35,7 +28,7 @@ public class Human {
      * This calls the four argument constructor
      */
     public Human(int positionX, int positionY, int iD){
-        this(positionX,positionY,iD,110);//calls the 4 argument constructor
+        this(positionX,positionY,110,iD);//calls the 4 argument constructor
     }
 
     /*****
@@ -48,7 +41,14 @@ public class Human {
         this.positionX = positionX;
         this.positionY = positionY;
     }
-    
+
+    /*************
+     * The GetID methid return the Id of the human(Getter)
+     *
+     * @return returns the Integer value which is the Id of the human
+     */
+    public int getiD(){  return iD;    }
+
     /*****
      * The attackGoblin method takes the Goblin object and compares the health og the goblin and the human, and the attack is based on their health
      *
@@ -77,19 +77,28 @@ public class Human {
      *
      */
     public void setHealth(int health){
-        if(this.health > 0)
+        if(this.health > 0)//only if the human is alive we can improve his health
             this.health = health;
+        else
+            this.health = 0;//The human is dead so the health will always be 0
     }
 
     /******
-     * Setterfor the position variables they take two values and return two values
+     * Setterfor the position variables they take two values and validates the values with the grid size and
+     * throws illegal argumant exception if the positions are outside the grid size
      *
      * @param -positionX   - int the X potion coordinate
      * @param -positionY   - int the Y position coordinate
      */
-    public void setPostion(int  positionX, int positionY){
-        this.positionX = positionX;
-        this.positionY = positionY;
+    public void setPosition (int  positionX, int positionY, int[] matrix){
+        if (positionX > 0  && positionX < matrix[0])
+            this.positionX = positionX;
+        else
+            throw new IllegalArgumentException("Position X has to be greater than 0  and less than "+ matrix[0]);
+        if (positionY > 0  && positionY < matrix[1])
+            this.positionY = positionY;
+        else
+            throw new IllegalArgumentException("Position Y has to be greater than 0  and less than "+ matrix[1]);
     }
 
     /******
