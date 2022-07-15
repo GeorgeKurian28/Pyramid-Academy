@@ -14,6 +14,11 @@ public class Land {
     private String grid;
     private int[][] gridMatrix;
 
+    private final String HU = "@";//"\u2603";//Human face
+    private final String GB = "#";//"\ud83c\udf74";//Goblin Face
+    private final String INV = "I%";//"\u2667";//Inventory
+    private final String TD = "\ud83d\udca7"; //TearDrop
+
     /*****
      * The two argument constructor for the land object that takes the X and Y grid size
      *
@@ -66,7 +71,8 @@ public class Land {
      */
     public void setGridMatrix(Goblin[] goblin, Human[] human) {
         int[] pos;
-        for (Human h : human) {// Go through the humans array and set the positions in the grid matrix using the cnt
+        for (Human h : human) {// Go through the humans arra----------
+            // y and set the positions in the grid matrix using the cnt
             pos = h.getPosition();
             if(!h.isDead()) //If the human is alive
                 gridMatrix[pos[0]][pos[1]] = h.getiD();//If the human is alive enter the id in the matrix
@@ -79,7 +85,7 @@ public class Land {
             if (!g.isDead()) // If the goblin is alive
                 gridMatrix[pos[0]][pos[1]] = g.getiD() + 200;//If the goblin is alive then set the value at the position = ID+200
             else
-                gridMatrix[pos[0]][pos[1]] = g.getiD() + 0;//If goblin is dead set the value at position to 0
+                gridMatrix[pos[0]][pos[1]] =  0;//If goblin is dead set the value at position to 0
         }
 
     }
@@ -89,7 +95,7 @@ public class Land {
      *
      * @return returns a String that will print the grid with all the required information
      */
-    public String setGrid(Goblin[] goblin, Human[] human){
+    public String setGrid(Goblin[] goblin, Human[] human, HashMap<Integer,Inventory> inventoryHashMap){
         grid = "";
         for(int i = 1 ; i <= sizeX; i++)
             grid += "     "+i+"   ";
@@ -98,40 +104,53 @@ public class Land {
             grid += "---------";
         grid += "\n";
         for(int i = 0 ; i < sizeY; i++){
+            //This section of the loop prints the type of Character (Human / Goblin), their serial number and health
             for(int j = 0; j < sizeX; j++) {
-                if(gridMatrix[j][i] >= 1 & gridMatrix[j][i] <= 200){
+                if(gridMatrix[j][i] >= 1 & gridMatrix[j][i] <= 200){// If this is a Human
                     if(gridMatrix[j][i] > 9)
-                        grid += "|%"+gridMatrix[j][i]+" ";
+                        grid += "|"+HU+gridMatrix[j][i]+" ";
                     else
-                        grid += "|%"+gridMatrix[j][i]+"  ";
-                    if(human[gridMatrix[j][i]-1].getHealth() > 99)
+                        grid += "|"+HU+gridMatrix[j][i]+"  ";
+                    if(human[gridMatrix[j][i]-1].getHealth() > 99)//If the health is triple digit
                         grid += human[gridMatrix[j][i]-1].getHealth() + " ";
-                    else if(human[gridMatrix[j][i]-1].getHealth() > 9)
+                    else if(human[gridMatrix[j][i]-1].getHealth() > 9)//If the health is double-digit
                         grid += human[gridMatrix[j][i]-1].getHealth() + "  ";
                     else
-                        grid += human[gridMatrix[j][i]-1].getHealth() + "   ";
+                        grid += human[gridMatrix[j][i]-1].getHealth() + "   ";//if the health is single digit
                 }
-                else if(gridMatrix[j][i] >= 201 & gridMatrix[j][i] <= 400){
+                else if(gridMatrix[j][i] >= 201 & gridMatrix[j][i] <= 400){//If this is a Goblin
                     if(gridMatrix[j][i] > 209)
-                        grid += "|€"+(gridMatrix[j][i]-200)+" ";
+                        grid += "|"+GB+(gridMatrix[j][i]-200)+" ";
                     else
-                        grid += "|€"+(gridMatrix[j][i]-200)+"  ";
-                    if(goblin[gridMatrix[j][i]-201].getHealth() > 99)
+                        grid += "|"+GB+(gridMatrix[j][i]-200)+"  ";
+                    if(goblin[gridMatrix[j][i]-201].getHealth() > 99)//If the health is triple digit
                         grid += goblin[gridMatrix[j][i]-201].getHealth()+ " ";
-                    else if(goblin[gridMatrix[j][i]-201].getHealth() > 9)
+                    else if(goblin[gridMatrix[j][i]-201].getHealth() > 9)//If the health is double-digit
                         grid += goblin[gridMatrix[j][i]-201].getHealth() + "  ";
                     else
-                        grid += goblin[gridMatrix[j][i]-201].getHealth() + "   ";
+                        grid += goblin[gridMatrix[j][i]-201].getHealth() + "   ";//if the health is single digit
                 }
                 else
                     grid += "|        ";
             }
             grid += "|"+ (i+1) +"\n";
+
+            for(int j = 0; j < sizeX; j++){//ADDITIONAL CELLS FOR INVENTORY AND DROPS
+                if(inventoryHashMap.containsKey(Integer.parseInt(j+""+i)))
+                    grid += "|      "+INV;
+                else
+                    grid += "|        ";
+            }
+            grid += "|"+ (i+1) +"\n";
+
+            //Print the floor line for the cells in this level
             for(int j = 0; j < sizeX; j++) {
                 grid += "---------";
             }
             grid += "\n";
+
         }
+
         return grid;
     }
 

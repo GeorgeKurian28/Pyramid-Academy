@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -14,6 +15,7 @@ public class Game {
         Goblin[] goblins;
         int[][] positions;
         int[] numberOfCharacters;
+        HashMap<Integer,Inventory> inventoryHashMap;
         Land land;
         welcome();
         land = chooseGridSize();
@@ -24,11 +26,13 @@ public class Game {
         //Get Humans and get Goblins with the array of positions as parameters
         humans = getHumans(numberOfCharacters[0],positions);
         goblins = getGoblines(numberOfCharacters,positions);
+        inventoryHashMap = getInventory(land.getGridSize());
+
         while( noOfHumans(humans)> 0 & noOfGoblins(goblins)>0){
             land.setGridMatrix(goblins, humans);
-            land.setGrid(goblins, humans);
+            land.setGrid(goblins, humans,inventoryHashMap);
             System.out.println(land);
-            humanPlayerTurn(humans, land, goblins);//human turn
+            humanPlayerTurn(humans, land, goblins,inventoryHashMap);//human turn
             //land.setGridMatrix(goblins, humans);//update all the new positions to the gridmatrix//IT IS ALREADY UPDATED IN THE HUMANS SIDE
             goblinTurn(humans, goblins, land);//goblin move(human position)
             //attack if close by
@@ -46,6 +50,7 @@ public class Game {
      */
     public void goblinTurn(Human[] humans,Goblin[] goblins, Land land){
         for (Goblin goblin:goblins) {
+            if(!goblin.isDead())
              goblinMove(goblin.getPrey(humans, land),goblin,land);
         }
     }
@@ -83,9 +88,10 @@ public class Game {
                 gPos[1] -= 1;
         }
 
-        if(land.getGridMatrix()[gPos[0]][gPos[1]] == 0) {
+        if(land.getGridMatrix()[gPos[0]][gPos[1]] == 0) {//CHECK GOBLIN FOR ERROS OF OVERLAP
             land.setGridMatrixValue(goblin.getPosition(),0);
             goblin.setPosition(gPos[0], gPos[1], land.getGridSize());
+            land.setGridMatrixValue(goblin.getPosition(),goblin.getiD()+200);
             //System.out.println(goblin);TO BE REMOVED
         }
     }
@@ -95,19 +101,60 @@ public class Game {
      *
      * @param -input   -String that stores the user choice should be(n/s/e/w) or else player losses turn
      */
-    public void humanPlayerTurn(Human[] human, Land land, Goblin[] goblin){
+    public void humanPlayerTurn(Human[] human, Land land, Goblin[] goblin, HashMap<Integer, Inventory> inventoryHashMap){
         String input;
         for(Human h:human){
             if(!h.isDead()){
                 message("Player "+h.getiD()+" this is your turn to move choose (n/s/e/w)");
                 input = scan.next();
                 if(input.contains("N")|input.contains("n")|input.contains("S")|input.contains("s")|input.contains("E")|input.contains("e")|input.contains("W")|input.contains("w")){
-                    humanMove(input,h,land, goblin);
+                    humanMove(input,h,land, goblin, inventoryHashMap);
                 }
                 else
                     message("This is not the correct input you loose your chance better luck next time !!!!");
+                if(h.hasWeaponInHand())
+                    message("Your Weapon"+h.getWeaponInHand());
+                if(wantToUseWeapon(h)){
+                    message("Enter the weapon name from the following list you have in stock");
+                    message(h.getWeaponInStock().toString());
+                    input = scan.next();
+                    if(h.getWeaponInStock().keySet().contains(input)){
+                        h.useWeapon(input);
+                    }
+                    else {
+                        message("This is an incorrect option better luck next time!!!!");
+                    }
+                }
             }
         }
+    }
+
+    /******
+     * wanttoUseWeapon asks if the human wants to use weapons
+     *
+     * @param -currPos   -int[] This stores the x and y position of human
+     * @param -newPos    -int[] This stores the new x and y position of human
+     */
+    public boolean wantToUseWeapon(Human human){
+        boolean decision = false;
+        String choice;
+        //if the human has weapon
+        if(human.hasWeaponInStock()){ // then ask if wants to use
+            if(human.hasWeaponInHand()){
+                message("Do you want to change your weapon (Y/N) ");
+            }
+            else {
+                message("Do you want to use a weapon (Y/N) " +
+                        "");
+            }
+            choice = scan.next();
+            if(!(choice.contains("y") || choice.contains("Y"))){
+                decision = false;
+            }
+            else
+                decision = true;
+        }
+        return decision;
     }
 
     /******
@@ -118,11 +165,19 @@ public class Game {
      * @param -currPos   -int[] This stores the x and y position of human
      * @param -newPos    -int[] This stores the new x and y position of human
      */
-    public void humanMove(String input, Human human, Land land , Goblin[] goblins){
+    public void humanMove(String input, Human human, Land land , Goblin[] goblins, HashMap<Integer,Inventory> inventoryHashMap){
+
         int[] currPos = human.getPosition();
         int[] newPos = new int[2];
         newPos[0] = currPos[0];
         newPos[1] = currPos[1];
+        Inventory inventory;
+
+        //check if there is inventory in the box
+        inventory = humanLookForInventory(newPos,inventoryHashMap);
+        if(inventory != null)
+            human.takeInventory(inventory);
+
         //find the new postion
         if(input.contains("N")| input.contains("n"))
             newPos[1] = currPos[1] - 1;
@@ -144,10 +199,22 @@ public class Game {
                 combat(human,goblins[land.getGridMatrix()[newPos[0]][newPos[1]] - 201],land);//human.attackGoblin(goblins[land.getGridMatrix()[newPos[0]][newPos[1]] - 201]); The goblins health should change here
             newPos = currPos;
         }
+
+
         //if it is same creature we cant kill, if it is different creature call attack command this will update the group
-        land.setGridMatrixValue(human.getPosition(),0);
-        human.setPosition(newPos[0],newPos[1],land.getGridSize());
-        land.setGridMatrixValue(human.getPosition(),human.getiD());
+        land.setGridMatrixValue(human.getPosition(),0);//Sets the land Grid matrix to 0
+        human.setPosition(newPos[0],newPos[1],land.getGridSize());//Sets the new position for human
+        land.setGridMatrixValue(human.getPosition(),human.getiD());//Sets the Land Grid matrix to new position
+    }
+
+    public Inventory humanLookForInventory(int[] humanPosition,HashMap<Integer, Inventory> inventoryHashMap){
+        Inventory inventory = null;
+        int key = Integer.parseInt(humanPosition[0]+""+humanPosition[1]);
+        if(inventoryHashMap.containsKey(key)){
+            inventory = inventoryHashMap.get(key);
+            inventoryHashMap.remove(key);
+        }
+        return inventory;
     }
 
     /******
@@ -193,7 +260,19 @@ public class Game {
 
         return positions;
     }
-
+    /******
+     * getInventory method generates inventory for 10% of the grid cells and the positions are determined randomly
+     *
+     * @param -hval -integer that stores the max number of humans possible
+     */
+    public HashMap<Integer, Inventory> getInventory(int[] gridSize){
+        HashMap<Integer, Inventory> inventoryMap =  new HashMap<>();
+        int[] arr = Stream.generate(Math::random).mapToInt(i -> (int)(Math.floor(i*99))).filter(x ->(x >= 10 & x < gridSize[0]*10)).distinct().filter(i ->(i%10) < gridSize[1]).limit((long)(0.1*gridSize[0]*gridSize[1])).toArray();
+        for(int i : arr){
+            inventoryMap.put(i,new Inventory((i/10),(i%10)));
+        }
+        return inventoryMap;
+    }
     /******
      * GetHumans creates an array of humans using the available grid spaces
      *
@@ -214,7 +293,7 @@ public class Game {
      */
     public void combat(Human human, Goblin goblin, Land land){
         boolean humanAttack = true;
-        if(Math.random() > 0.5)
+        if(Math.random() < 0.5)
             humanAttack = false;
         if(humanAttack)
             goblin = human.attackGoblin(goblin);
@@ -222,8 +301,9 @@ public class Game {
             human = goblin.attackHuman(human);
         if(human.getHealth() <=0 )
             land.setGridMatrixValue(human.getPosition(),0);
-        if(goblin.getHealth() <=0 )
-            land.setGridMatrixValue(goblin.getPosition(),0);
+        if(goblin.getHealth() <=0 ) {
+            land.setGridMatrixValue(goblin.getPosition(), 0);
+        }
     }
 
     /******
@@ -240,6 +320,7 @@ public class Game {
 
         return goblins;
     }
+
 
 
     /******

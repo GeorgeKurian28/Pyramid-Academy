@@ -10,6 +10,7 @@ class HumanTest {
     Human human3;
     Goblin goblin;
 
+
     @BeforeEach
     void setUp() {
         human1 = new Human(1,2, 10);

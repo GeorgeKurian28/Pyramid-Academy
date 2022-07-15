@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Human {
     /******
      * The Human Object has these attributes and methods,
@@ -12,6 +15,8 @@ public class Human {
     private static int cnt = 1;
     private int iD;
     private int positionX = 0, positionY = 0;
+    private HashMap<String,Integer> weapons = new HashMap<>();
+    private Weapon weapon;
 
     /*****
      * The two argument constructor for the Human object
@@ -50,12 +55,23 @@ public class Human {
     public int getiD(){  return iD;    }
 
     /*****
-     * The attackGoblin method takes the Goblin object and compares the health og the goblin and the human, and the attack is based on their health
+     * The attackGoblin method takes the Goblin object and compares the health of the goblin and the human, and the attack is based on their health
+     * But if the human has a weapon then depending on the strength of the weapon the intensity if the attack increases
      *
      * @return The goblin object is returned at a different state than what it came in if it was weaker than the human
      */
     public Goblin attackGoblin(Goblin goblin){
-        if(getHealth() > goblin.getHealth()) {
+        if(hasWeaponInHand()){
+            if(this.weapon.getStrength() >= 40){
+                goblin.setHealth(0);
+                this.weapon = null;
+            }
+            else if(this.weapon.getStrength() > 20){
+                goblin.setHealth(goblin.getHealth() - 20);
+                this.weapon.setStrength(this.weapon.getStrength() - 20);
+            }
+        }
+        else if(getHealth() > goblin.getHealth()) {
             goblin.setHealth(goblin.getHealth() - 10);
         }
         else
@@ -119,6 +135,90 @@ public class Human {
      */
     public boolean isDead(){
         return getHealth() <= 0;
+    }
+
+    /*************
+     * The method takeInventory() adds the health from the inventory to the human health and adds the weapons to the humans inventory
+     *
+     *
+     */
+    public void takeInventory(Inventory inventory){
+        this.setHealth(getHealth()+inventory.getHealth());// add to human health
+        this.takeWeapons(inventory.getWeapons());// add weapons to the weapons stock
+    }
+
+    /*************
+     * The method takeWeapons() updates the weapon for the human to use
+     *
+     */
+    public void takeWeapons(HashMap<String,Integer> weapons) {
+        if(this.weapons.isEmpty())
+            this.weapons = weapons;
+        else{
+            for(String name: weapons.keySet()) {
+                if(this.weapons.containsKey(name))
+                    this.weapons.put(name, this.weapons.get(name) + weapons.get(name));// If the weapon is present increase its strength with the new amount
+                else
+                    this.weapons.put(name,weapons.get(name));
+                if(this.weapon != null & this.weapon.getName().equals(name)){
+                    this.weapon.setStrength(this.weapon.getStrength()+ weapons.get(name));
+                }
+            }
+        }
+
+    }
+
+    /*************
+     * The method hasWeaponsInStock() returns boolean true if the human has weapons
+     *
+     * @return returns a boolean true if the human has weapons
+     */
+    public boolean hasWeaponInStock(){
+        return !(weapons.isEmpty());
+    }
+
+    /*************
+     * The method hasWeaponInHand() returns boolean true if the human has weapon in hand
+     *
+     * @return returns a boolean true if the human has weapons
+     */
+    public boolean hasWeaponInHand(){
+        return (weapon != null);
+    }
+
+    /*******************
+     * getWeaponInHand method return String the name of the weapon in hand and its strength
+     *
+     */
+    public String getWeaponInHand(){
+        return("  Name : - "+this.weapon.getName() + " Strength :- " + this.weapon.getStrength());
+    }
+
+    /*******************
+     * getWeaponInHand method return String the name of the weapon in hand and its strength
+     *
+     */
+    public HashMap<String,Integer> getWeaponInStock(){
+         return weapons;
+    }
+
+    /*************
+     * The method useWeapons() will put a weapon in the hand of the human, if he has the weapon in stock, if he is already
+     * holding a weapon then the present weapon goes back in stock and he gets the new weapon,
+     * but he doesnot have the weapon in stock he gets the message that he doesnot have it
+     *
+     *
+     */
+    public void useWeapon(String weapon){
+
+            if (weapons.containsKey(weapon)) {
+                if(this.weapon != null)
+                    weapons.put(this.weapon.getName(),this.weapon.getStrength());
+                this.weapon = new Weapon(weapon, weapons.remove(weapon));
+            }
+            else
+                System.out.println("You don't have this weapon !!!!!!");
+
     }
 
     @Override
