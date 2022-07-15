@@ -14,10 +14,10 @@ public class Land {
     private String grid;
     private int[][] gridMatrix;
 
-    private final String HU = "@";//"\u2603";//Human face
-    private final String GB = "#";//"\ud83c\udf74";//Goblin Face
-    private final String INV = "I%";//"\u2667";//Inventory
-    private final String TD = "\ud83d\udca7"; //TearDrop
+    private final String HU = "\ud83d\udc68";//Human face
+    private final String GB = "\ud83d\udc7e";//Goblin Face
+    private final String INV ="\u2667";//Inventory
+    private final String TD = "\u2693";//"\ud83d\udd39"; //TearDrop
 
     /*****
      * The two argument constructor for the land object that takes the X and Y grid size
@@ -95,8 +95,8 @@ public class Land {
      *
      * @return returns a String that will print the grid with all the required information
      */
-    public String setGrid(Goblin[] goblin, Human[] human, HashMap<Integer,Inventory> inventoryHashMap){
-        grid = "";
+    public String setGrid(Goblin[] goblin, Human[] human, HashMap<Integer,Inventory> inventoryHashMap, HashMap<Integer, Drops> dropsHashMap){
+        grid="     HUMANS - "+HU+ "      GOBLINS - "+GB+"        INVENTORY - "+INV+"        DROPS - "+TD+ "\n\n" ;
         for(int i = 1 ; i <= sizeX; i++)
             grid += "     "+i+"   ";
         grid += "\n";
@@ -105,43 +105,11 @@ public class Land {
         grid += "\n";
         for(int i = 0 ; i < sizeY; i++){
             //This section of the loop prints the type of Character (Human / Goblin), their serial number and health
-            for(int j = 0; j < sizeX; j++) {
-                if(gridMatrix[j][i] >= 1 & gridMatrix[j][i] <= 200){// If this is a Human
-                    if(gridMatrix[j][i] > 9)
-                        grid += "|"+HU+gridMatrix[j][i]+" ";
-                    else
-                        grid += "|"+HU+gridMatrix[j][i]+"  ";
-                    if(human[gridMatrix[j][i]-1].getHealth() > 99)//If the health is triple digit
-                        grid += human[gridMatrix[j][i]-1].getHealth() + " ";
-                    else if(human[gridMatrix[j][i]-1].getHealth() > 9)//If the health is double-digit
-                        grid += human[gridMatrix[j][i]-1].getHealth() + "  ";
-                    else
-                        grid += human[gridMatrix[j][i]-1].getHealth() + "   ";//if the health is single digit
-                }
-                else if(gridMatrix[j][i] >= 201 & gridMatrix[j][i] <= 400){//If this is a Goblin
-                    if(gridMatrix[j][i] > 209)
-                        grid += "|"+GB+(gridMatrix[j][i]-200)+" ";
-                    else
-                        grid += "|"+GB+(gridMatrix[j][i]-200)+"  ";
-                    if(goblin[gridMatrix[j][i]-201].getHealth() > 99)//If the health is triple digit
-                        grid += goblin[gridMatrix[j][i]-201].getHealth()+ " ";
-                    else if(goblin[gridMatrix[j][i]-201].getHealth() > 9)//If the health is double-digit
-                        grid += goblin[gridMatrix[j][i]-201].getHealth() + "  ";
-                    else
-                        grid += goblin[gridMatrix[j][i]-201].getHealth() + "   ";//if the health is single digit
-                }
-                else
-                    grid += "|        ";
-            }
-            grid += "|"+ (i+1) +"\n";
+            grid += printFirstLine(i,goblin,human);
 
-            for(int j = 0; j < sizeX; j++){//ADDITIONAL CELLS FOR INVENTORY AND DROPS
-                if(inventoryHashMap.containsKey(Integer.parseInt(j+""+i)))
-                    grid += "|      "+INV;
-                else
-                    grid += "|        ";
-            }
-            grid += "|"+ (i+1) +"\n";
+            grid += printSecondLine(i,goblin,human);
+
+            grid += printThirdLine(i,inventoryHashMap, dropsHashMap);
 
             //Print the floor line for the cells in this level
             for(int j = 0; j < sizeX; j++) {
@@ -151,6 +119,74 @@ public class Land {
 
         }
 
+        return grid;
+    }
+
+    public String printFirstLine(int i,Goblin[] goblin, Human[] human){
+        String grid="" ;
+        for(int j = 0; j < sizeX; j++) {
+            if(gridMatrix[j][i] >= 1 & gridMatrix[j][i] <= 200){// If this is a Human
+                grid += "|   ";
+                if(human[gridMatrix[j][i]-1].getHealth() > 99)//If the health is triple digit
+                    grid += human[gridMatrix[j][i]-1].getHealth() + "  ";
+                else if(human[gridMatrix[j][i]-1].getHealth() > 9)//If the health is double-digit
+                    grid += human[gridMatrix[j][i]-1].getHealth() + "   ";
+                else
+                    grid += human[gridMatrix[j][i]-1].getHealth() + "    ";//if the health is single digit
+            }
+            else if(gridMatrix[j][i] >= 201 & gridMatrix[j][i] <= 400){//If this is a Goblin
+                grid += "|   ";
+                if(goblin[gridMatrix[j][i]-201].getHealth() > 99)//If the health is triple digit
+                    grid += goblin[gridMatrix[j][i]-201].getHealth()+ "  ";
+                else if(goblin[gridMatrix[j][i]-201].getHealth() > 9)//If the health is double-digit
+                    grid += goblin[gridMatrix[j][i]-201].getHealth() + "   ";
+                else
+                    grid += goblin[gridMatrix[j][i]-201].getHealth() + "    ";//if the health is single digit
+            }
+            else
+                grid += "|        ";
+        }
+        grid += "|"+ (i+1) +"\n";
+        return grid;
+    }
+
+    public String printSecondLine(int i,Goblin[] goblin, Human[] human){
+        String grid="";
+        for(int j = 0; j < sizeX; j++) {
+            if(gridMatrix[j][i] >= 1 & gridMatrix[j][i] <= 200){// If this is a Human
+                if(gridMatrix[j][i] > 9)
+                    grid += "   "+HU+gridMatrix[j][i];
+                else
+                    grid += "    "+HU+gridMatrix[j][i];
+                grid += "   ";
+            }
+            else if(gridMatrix[j][i] >= 201 & gridMatrix[j][i] <= 400){//If this is a Goblin
+                if(gridMatrix[j][i] > 209)
+                    grid += "   "+GB+(gridMatrix[j][i]-200);
+                else
+                    grid += "    "+GB+(gridMatrix[j][i]-200);
+                grid += "   ";
+            }
+            else
+                grid += "         ";
+        }
+        grid += " \n";
+        return grid;
+    }
+
+    public String printThirdLine(int i,HashMap<Integer,Inventory> inventoryHashMap, HashMap<Integer, Drops> dropsHashMap){
+        String grid="";
+        for(int j = 0; j < sizeX; j++){//ADDITIONAL CELLS FOR INVENTORY AND DROPS
+            if(dropsHashMap.containsKey(Integer.parseInt(j+""+i)))
+                grid += "|"+TD+"      ";
+            else
+                grid += "|       ";
+            if(inventoryHashMap.containsKey(Integer.parseInt(j+""+i)))
+                grid += INV;
+            else
+                grid += " ";
+        }
+        grid += "|"+ (i+1) +"\n";
         return grid;
     }
 

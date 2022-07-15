@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class Goblin {
     /******
      * The Goblin Object has these attributes and methods,
@@ -106,6 +108,10 @@ public class Goblin {
      */
     public int getHealth(){
         return health;
+    }
+
+    public void takeDrops(int drops){
+        this.setHealth(this.getHealth()+(drops*10));
     }
 
     /*************

@@ -16,6 +16,7 @@ public class Game {
         int[][] positions;
         int[] numberOfCharacters;
         HashMap<Integer,Inventory> inventoryHashMap;
+        HashMap<Integer, Drops> dropsHashMap;
         Land land;
         welcome();
         land = chooseGridSize();
@@ -27,14 +28,15 @@ public class Game {
         humans = getHumans(numberOfCharacters[0],positions);
         goblins = getGoblines(numberOfCharacters,positions);
         inventoryHashMap = getInventory(land.getGridSize());
+        dropsHashMap = getDrops(land.getGridSize());
 
         while( noOfHumans(humans)> 0 & noOfGoblins(goblins)>0){
             land.setGridMatrix(goblins, humans);
-            land.setGrid(goblins, humans,inventoryHashMap);
+            land.setGrid(goblins, humans,inventoryHashMap,dropsHashMap);
             System.out.println(land);
             humanPlayerTurn(humans, land, goblins,inventoryHashMap);//human turn
             //land.setGridMatrix(goblins, humans);//update all the new positions to the gridmatrix//IT IS ALREADY UPDATED IN THE HUMANS SIDE
-            goblinTurn(humans, goblins, land);//goblin move(human position)
+            goblinTurn(humans, goblins, land, dropsHashMap);//goblin move(human position)
             //attack if close by
         }
         if(noOfHumans(humans) > 0)
@@ -48,10 +50,10 @@ public class Game {
      *
      *
      */
-    public void goblinTurn(Human[] humans,Goblin[] goblins, Land land){
+    public void goblinTurn(Human[] humans,Goblin[] goblins, Land land, HashMap<Integer, Drops> dropsHashMap){
         for (Goblin goblin:goblins) {
             if(!goblin.isDead())
-             goblinMove(goblin.getPrey(humans, land),goblin,land);
+             goblinMove(goblin.getPrey(humans, land),goblin,land, dropsHashMap);
         }
     }
 
@@ -65,12 +67,17 @@ public class Game {
      * @param -x      -int stores the difference between the x coordinates of the goblin and human
      * @param -y      -int stores the difference between the y coordinates of the goblin and human
      */
-    public void goblinMove(Human human, Goblin goblin, Land land){
+    public void goblinMove(Human human, Goblin goblin, Land land, HashMap<Integer, Drops> dropsHashMap){
 
         int [] hPos = human.getPosition();
         int [] gPos = goblin.getPosition();
         int x = gPos[0] - hPos[0];
         int y = gPos[1] - hPos[1];
+        Drops drops;
+
+        drops = goblinLookForDrops(gPos, dropsHashMap);//Goblin looks for drops if it finds drops
+        if(drops != null)
+            goblin.takeDrops(drops.getNum());//It takes the drops
 
         //Check to see the direction of the human from the goblin
         if((x == 0 || y == 0) & (Math.abs(x) == 1 || Math.abs(y) == 1))       //We do that by comapring the x and y cooridnates
@@ -174,9 +181,9 @@ public class Game {
         Inventory inventory;
 
         //check if there is inventory in the box
-        inventory = humanLookForInventory(newPos,inventoryHashMap);
+        inventory = humanLookForInventory(newPos,inventoryHashMap);//Human looks for inventory in the cell
         if(inventory != null)
-            human.takeInventory(inventory);
+            human.takeInventory(inventory);//If he finds he takes
 
         //find the new postion
         if(input.contains("N")| input.contains("n"))
@@ -207,6 +214,13 @@ public class Game {
         land.setGridMatrixValue(human.getPosition(),human.getiD());//Sets the Land Grid matrix to new position
     }
 
+    /*****************
+     * humanLookforInventory method takes the human postion and the inventory has map and returns null
+     * if there is no inventory in the cell and if there is inventory in the cell it returns it
+     *
+     * @return It returns an Inventory object, which is the inventory in the cell
+     */
+
     public Inventory humanLookForInventory(int[] humanPosition,HashMap<Integer, Inventory> inventoryHashMap){
         Inventory inventory = null;
         int key = Integer.parseInt(humanPosition[0]+""+humanPosition[1]);
@@ -215,6 +229,22 @@ public class Game {
             inventoryHashMap.remove(key);
         }
         return inventory;
+    }
+
+    /*****************
+     * gobinLookforDrops method takes the goblin postion and the drops has map and returns null
+     * if there is no drops in the cell and if there is drops in the cell it returns it
+     *
+     * @return It returns a Drop object, which is the drop in the cell
+     */
+    public Drops goblinLookForDrops(int[] goblinPosition,HashMap<Integer, Drops> dropsHashMap){
+        Drops drop = null;
+        int key = Integer.parseInt(goblinPosition[0]+""+goblinPosition[1]);
+        if(dropsHashMap.containsKey(key)){
+            drop = dropsHashMap.get(key);
+            dropsHashMap.remove(key);
+        }
+        return drop;
     }
 
     /******
@@ -260,10 +290,11 @@ public class Game {
 
         return positions;
     }
+
     /******
      * getInventory method generates inventory for 10% of the grid cells and the positions are determined randomly
      *
-     * @param -hval -integer that stores the max number of humans possible
+     * @return returns the HashMap of the inventory where the Key is the XcoorinateYcoordinate and the Key is the Inventory object
      */
     public HashMap<Integer, Inventory> getInventory(int[] gridSize){
         HashMap<Integer, Inventory> inventoryMap =  new HashMap<>();
@@ -272,6 +303,20 @@ public class Game {
             inventoryMap.put(i,new Inventory((i/10),(i%10)));
         }
         return inventoryMap;
+    }
+
+    /******
+     * getDrops method generates Set of Drops for 10% of the grid cells and the positions are determined randomly
+     *
+     * @return returns the HashMap of the Drops where the Key is the XcoorinateYcoordinate and the Key is the Inventory object
+     */
+    public HashMap<Integer, Drops> getDrops(int[] gridSize){
+        HashMap<Integer, Drops> dropsHashMap =  new HashMap<>();
+        int[] arr = Stream.generate(Math::random).mapToInt(i -> (int)(Math.floor(i*99))).filter(x ->(x >= 10 & x < gridSize[0]*10)).distinct().filter(i ->(i%10) < gridSize[1]).limit((long)(0.1*gridSize[0]*gridSize[1])).toArray();
+        for(int i : arr){
+            dropsHashMap.put(i,new Drops((i/10),(i%10)));
+        }
+        return dropsHashMap;
     }
     /******
      * GetHumans creates an array of humans using the available grid spaces
