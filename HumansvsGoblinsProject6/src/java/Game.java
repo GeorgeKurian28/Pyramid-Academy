@@ -116,28 +116,27 @@ public class Game {
      * @param -input   -String that stores the user choice should be(n/s/e/w) or else player losses turn
      */
     public void humanPlayerTurn(Human[] human, Land land, Goblin[] goblin, HashMap<Integer, Inventory> inventoryHashMap, HashMap<Integer, TreasureChest> treasureChestHashMap){
-        String input;
+        String input = "";
+        boolean validInput = false;
         for(Human h:human){
             if(!h.isDead()){
-                message("Player "+h.getiD()+" this is your turn to move choose (n/s/e/w)");
-                input = scan.next();
-                if(input.contains("N")|input.contains("n")|input.contains("S")|input.contains("s")|input.contains("E")|input.contains("e")|input.contains("W")|input.contains("w")){
-                    treasureChestHashMap = humanMove(input,h,land, goblin, inventoryHashMap, treasureChestHashMap);
+                message("Player " + h.getiD() + " this is your turn to move choose (n/s/e/w)");
+                while (!validInput) {
+                    input = scan.next();
+                    validInput = correctInput("String",input,"n","N","s","S","e","E","w","W");
                 }
-                else
-                    message("This is not the correct input you loose your chance better luck next time !!!!");
+                validInput = false;
+                treasureChestHashMap = humanMove(input,h,land, goblin, inventoryHashMap, treasureChestHashMap);
                 if(h.hasWeaponInHand())
                     message("Your Weapon"+h.getWeaponInHand());
                 if(wantToUseWeapon(h)){
                     message("Enter the weapon name from the following list you have in stock");
                     message(h.getWeaponInStock().toString());
-                    input = scan.next();
-                    if(h.getWeaponInStock().keySet().contains(input)){
-                        h.useWeapon(input);
-                    }
-                    else {
-                        message("This is an incorrect option better luck next time!!!!");
-                    }
+                    while(!validInput){
+                        input = scan.next();
+                        validInput = correctInput("String",input,h.getWeaponInStock().keySet().toArray(new String [0]));
+                    }validInput = false;
+                    h.useWeapon(input);
                 }
             }
         }
@@ -151,17 +150,20 @@ public class Game {
      */
     public boolean wantToUseWeapon(Human human){
         boolean decision = false;
-        String choice;
+        String choice = "";
+        boolean validInput = false;
         //if the human has weapon
         if(human.hasWeaponInStock()){ // then ask if wants to use
             if(human.hasWeaponInHand()){
                 message("Do you want to change your weapon (Y/N) ");
             }
             else {
-                message("Do you want to use a weapon (Y/N) " +
-                        "");
+                message("Do you want to use a weapon (Y/N) " + "");
             }
-            choice = scan.next();
+            while(!validInput){
+                choice = scan.next();
+                validInput = correctInput("String",choice,"y","Y","n","N");
+            }
             if(!(choice.contains("y") || choice.contains("Y"))){
                 decision = false;
             }
@@ -388,10 +390,14 @@ public class Game {
      *
      */
     public HashMap<Integer, TreasureChest> generateTreasureChest(HashMap<Integer, TreasureChest> treasureChestHashMap, int[] gridSize){
-        int positionX, positionY;
+        int positionX, positionY, key;
         positionX = (int)(Math.floor(Math.random()*gridSize[0]));
         positionY = (int)(Math.floor(Math.random()*gridSize[1]));
-        treasureChestHashMap.put(Integer.parseInt(positionX+""+positionY), new TreasureChest(positionX,positionY));
+        key = Integer.parseInt(positionX+""+positionY);
+        if(treasureChestHashMap.containsKey(key))
+            treasureChestHashMap.get(key).setPoints(treasureChestHashMap.get(key).getPoints()+100);
+        else
+            treasureChestHashMap.put(Integer.parseInt(positionX+""+positionY), new TreasureChest(100,positionX,positionY));
         return treasureChestHashMap;
     }
 
@@ -409,7 +415,6 @@ public class Game {
 
         return goblins;
     }
-
 
 
     /******
@@ -520,6 +525,41 @@ public class Game {
                 count++;
         }
         return count;
+    }
+    /***************
+     * correctInput method takes the input type, the input criteria and the input and returns a boolean value if the
+     * input is correct
+     */
+    public boolean correctInput(String inputType, String input, String ...criteria){
+        String result = "";
+
+        if(inputType == "int"){
+            try{
+
+                if(Integer.parseInt(input) >= Integer.parseInt(criteria[0]) && Integer.parseInt(input) <= Integer.parseInt(criteria[1])){
+                    return true;
+                }
+                else{
+                    System.out.println("This is outside the range "+ criteria[0] + criteria[1]);
+                }
+            }
+            catch(Exception e){
+                System.out.println("This is not a number. Please try again and enter a  number in the range "+criteria[0] +" ,"+ criteria[1]);
+                return false;
+            }
+        }
+        else if(inputType == "String"){
+            for(String str: criteria){
+                if(input.contains(str)){
+                    return  true;
+                }
+            }
+            System.out.print("This is incorrect choice, choose from ");
+            for(String str: criteria){
+                System.out.print(str + " / ");
+            }
+        }
+        return false;
     }
 
     /******
