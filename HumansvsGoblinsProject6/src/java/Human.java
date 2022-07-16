@@ -17,6 +17,7 @@ public class Human {
     private int positionX = 0, positionY = 0;
     private HashMap<String,Integer> weapons = new HashMap<>();
     private Weapon weapon;
+    private static int points = 0;
 
     /*****
      * The two argument constructor for the Human object
@@ -219,6 +220,14 @@ public class Human {
             else
                 System.out.println("You don't have this weapon !!!!!!");
 
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public int getPoints() {
+        return points;
     }
 
     @Override

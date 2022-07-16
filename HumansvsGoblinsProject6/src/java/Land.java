@@ -18,6 +18,7 @@ public class Land {
     private final String GB = "\ud83d\udc7e";//Goblin Face
     private final String INV ="\u2667";//Inventory
     private final String TD = "\u2693";//"\ud83d\udd39"; //TearDrop
+    private final String TC = "\u25fb";//Treasure Chest
 
     /*****
      * The two argument constructor for the land object that takes the X and Y grid size
@@ -95,8 +96,8 @@ public class Land {
      *
      * @return returns a String that will print the grid with all the required information
      */
-    public String setGrid(Goblin[] goblin, Human[] human, HashMap<Integer,Inventory> inventoryHashMap, HashMap<Integer, Drops> dropsHashMap){
-        grid="     HUMANS - "+HU+ "      GOBLINS - "+GB+"        INVENTORY - "+INV+"        DROPS - "+TD+ "\n\n" ;
+    public String setGrid(Goblin[] goblin, Human[] human, HashMap<Integer,Inventory> inventoryHashMap, HashMap<Integer, Drops> dropsHashMap, HashMap<Integer,TreasureChest> treasureChestHashMap){
+        grid="     HUMANS - "+HU+ "      GOBLINS - "+GB+"        INVENTORY - "+INV+"        DROPS - "+TD+ "           TREASURE CHEST - "+TC+"\n\n" ;
         for(int i = 1 ; i <= sizeX; i++)
             grid += "     "+i+"   ";
         grid += "\n";
@@ -109,7 +110,7 @@ public class Land {
 
             grid += printSecondLine(i,goblin,human);
 
-            grid += printThirdLine(i,inventoryHashMap, dropsHashMap);
+            grid += printThirdLine(i,inventoryHashMap, dropsHashMap, treasureChestHashMap);
 
             //Print the floor line for the cells in this level
             for(int j = 0; j < sizeX; j++) {
@@ -174,13 +175,18 @@ public class Land {
         return grid;
     }
 
-    public String printThirdLine(int i,HashMap<Integer,Inventory> inventoryHashMap, HashMap<Integer, Drops> dropsHashMap){
+    public String printThirdLine(int i,HashMap<Integer,Inventory> inventoryHashMap, HashMap<Integer, Drops> dropsHashMap, HashMap<Integer,TreasureChest> treasureChestHashMap){
         String grid="";
         for(int j = 0; j < sizeX; j++){//ADDITIONAL CELLS FOR INVENTORY AND DROPS
             if(dropsHashMap.containsKey(Integer.parseInt(j+""+i)))
-                grid += "|"+TD+"      ";
+                grid += "|"+TD+"   ";
             else
-                grid += "|       ";
+                grid += "|    ";
+            if(treasureChestHashMap.containsKey(Integer.parseInt(j+""+i)))
+                grid += TC+"  ";
+            else
+                grid += "   ";
+
             if(inventoryHashMap.containsKey(Integer.parseInt(j+""+i)))
                 grid += INV;
             else
