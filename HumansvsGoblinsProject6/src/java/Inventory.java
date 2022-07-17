@@ -3,7 +3,7 @@ import java.util.HashMap;
 
 public class Inventory {
     /******
-     * The Goblin Object has these attributes and methods,
+     * The Inventory Object has these attributes and methods,
      *
      * @param -health    -Integer value that stores the health in the inventory
      * @param -weapons   -HashMap with the name of the weapon as the key and the strength of the weapon as an integer
