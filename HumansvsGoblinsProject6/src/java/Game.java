@@ -25,7 +25,7 @@ public class Game {
      * @param -humans                -The humans array stores all the human objects for the game in an array
      * @param -goblins               -The goblins array stores all the goblin objects for the game in an array
      * @param -positions             -The positions array stores all the random position in the gridmatrix
-     * @param -numberOfCharacters    -The numberOfCharacters stores the max number of goblins and humans that can be entered for a given grid size
+     * @param -numberOfCharacters    -The numberOfCharacters stores the number of goblins and humans for the game
      * @param -inventoryHashMap      -The inventoryHashMap  is a Hash Map that stores the inventory objects that are randomly created on the grid
      * @param -dropsHashMap          -The dropsHashMap is a Hash Map that stores the drops objects that are randomly created on the grid
      * @param -treasureChestHashMap  -The treasurecHestHashMap is a Hash Map that stores the treasure chests that are added to the grid
@@ -173,29 +173,28 @@ public class Game {
      * @param -newPos    -int[] This stores the new x and y position of human
      */
     public boolean wantToUseWeapon(Human human){
-        
-        boolean decision = false;
+
         String choice = "";
-        boolean validInput = false;
+        boolean decision = false;
 
-
-        if(human.hasWeaponInStock()){ // then ask if wants to use
-            if(human.hasWeaponInHand()){
+        if(human.hasWeaponInStock()){       // Does the human have weapons in stock?
+            if(human.hasWeaponInHand()){    // If yes does the human have any in hand
                 message("Do you want to change your weapon (Y/N) ");
             }
             else {
                 message("Do you want to use a weapon (Y/N) " + "");
             }
-            while(!validInput){
+            while(!decision){               //if the input is not correct run the while loop to get a correct input
                 choice = scan.next();
-                validInput = correctInput("String",choice,"y","Y","n","N");
+                decision = correctInput("String",choice,"y","Y","n","N");//validate the input
             }
-            if(!(choice.contains("y") || choice.contains("Y"))){
+            if(!(choice.contains("y") || choice.contains("Y"))){ //If the choice is not Yes
                 decision = false;
             }
-            else
+            else                                                  //If the choice is yes
                 decision = true;
         }
+
         return decision;
     }
 
@@ -218,15 +217,15 @@ public class Game {
 
         //check if there is inventory in the box
         inventory = humanLookForInventory(newPos,inventoryHashMap);//Human looks for inventory in the cell
-        if(inventory != null)
-            human.takeInventory(inventory);//If he finds he takes
+        if(inventory != null)                                      //If there is inventory in the cell
+            human.takeInventory(inventory);                        //The human takes the inventory
 
         //check if there is treasureChest in the box
         treasureChest = humanLookForTreasureChest(newPos,treasureChestHashMap);//Human looks for treasureChest in the cell
-        if(treasureChest != null)
-            human.setPoints(treasureChest.getPoints()+human.getPoints());//If he finds he takes
+        if(treasureChest != null)                                              //If there is treasure chest is in the cell
+            human.setPoints(treasureChest.getPoints()+human.getPoints());      //Human takes the chest
 
-        //find the new postion
+        //Set the new position based on the direction choosen
         if(input.contains("N")| input.contains("n"))
             newPos[1] = currPos[1] - 1;
         else if (input.contains("S")| input.contains("s"))
@@ -236,27 +235,25 @@ public class Game {
         else if (input.contains("W")| input.contains("w"))
             newPos[0] = currPos[0] - 1;
 
-        //check if the new postion is within the grid
-        if(newPos[0] < 0 | newPos[0] >= land.getGridSize()[0])
-             newPos = currPos;
-        if(newPos[1] < 0 | newPos[1] >= land.getGridSize()[1] )
-             newPos = currPos;
+        //check if the new position is within the grid, if it is not within the grid revert to old position
+        if((newPos[0] < 0 | newPos[0] >= land.getGridSize()[0]) || (newPos[1] < 0 | newPos[1] >= land.getGridSize()[1])) //Is the position below 0 or above the max grid size outside the grid
+             newPos = currPos;                                  //Revert to the old position
+
         //check if there is something in the box
-        if( land.getGridMatrix()[newPos[0]][newPos[1]] > 0) {
-            if (land.getGridMatrix()[newPos[0]][newPos[1]] > 200) {
-                treasureChestHashMap = combat(human, goblins[land.getGridMatrix()[newPos[0]][newPos[1]] - 201], land, treasureChestHashMap);//human.attackGoblin(goblins[land.getGridMatrix()[newPos[0]][newPos[1]] - 201]); The goblins health should change here
+        if( land.getGridMatrix()[newPos[0]][newPos[1]] > 0) {       //Is there another character in the box
+            if (land.getGridMatrix()[newPos[0]][newPos[1]] > 200) { //Is that character a Goblin
+                treasureChestHashMap = combat(human, goblins[land.getGridMatrix()[newPos[0]][newPos[1]] - 201], land, treasureChestHashMap);//Since there is goblin initiate the combat and update the treasure map from the returned value
             }
-            newPos = currPos;
+            newPos = currPos;                                       //Since there is already a character in the cell revert to the old position
         }
 
-
-        //if it is same creature we cant kill, if it is different creature call attack command this will update the group
-        land.setGridMatrixValue(human.getPosition(),0);//Sets the land Grid matrix to 0
-        human.setPosition(newPos[0],newPos[1],land.getGridSize());//Sets the new position for human
-        land.setGridMatrixValue(human.getPosition(),human.getiD());//Sets the Land Grid matrix to new position
+        land.setGridMatrixValue(human.getPosition(),0);     //Sets the land Grid matrix to 0 at the current position of the human
+        human.setPosition(newPos[0],newPos[1],land.getGridSize());//Sets the position for human in the human object using the value in the newPostion variable can be the old position or a new position
+        land.setGridMatrixValue(human.getPosition(),human.getiD());//Sets the Land Grid matrix, new position equal to the human ID
 
         return treasureChestHashMap;
     }
+
     /*****************
      * humanLookforTreasureChest method takes the human postion and the treasureChest has map and returns null
      * if there is no treasureChest in the cell and if there is treasureChest in the cell it returns it
@@ -264,12 +261,15 @@ public class Game {
      * @return It returns an treasureChest object, which is the treasureChest in the cell
      */
     public TreasureChest humanLookForTreasureChest(int[] humanPosition,HashMap<Integer, TreasureChest> treasureChestHashMap){
+
         TreasureChest treasureChest = null;
         int key = Integer.parseInt(humanPosition[0]+""+humanPosition[1]);
-        if(treasureChestHashMap.containsKey(key)){
-            treasureChest = treasureChestHashMap.get(key);
-            treasureChestHashMap.remove(key);
+
+        if(treasureChestHashMap.containsKey(key)){          //Is there a treasure chest in the cell, Find that my checking the key in the Hash Map
+            treasureChest = treasureChestHashMap.get(key);  //If there is a chest, take the chest by saving the object in the treasureChest variable
+            treasureChestHashMap.remove(key);               //Remove the object from the Map
         }
+
         return treasureChest;
     }
 
@@ -280,12 +280,15 @@ public class Game {
      * @return It returns an Inventory object, which is the inventory in the cell
      */
     public Inventory humanLookForInventory(int[] humanPosition,HashMap<Integer, Inventory> inventoryHashMap){
+
         Inventory inventory = null;
         int key = Integer.parseInt(humanPosition[0]+""+humanPosition[1]);
-        if(inventoryHashMap.containsKey(key)){
-            inventory = inventoryHashMap.get(key);
-            inventoryHashMap.remove(key);
+
+        if(inventoryHashMap.containsKey(key)){          //Is there an inventory in the cell, Find that my checking the key in the Hash Map
+            inventory = inventoryHashMap.get(key);      //If there is an inventory, take the chest by saving the object in the treasureChest variable
+            inventoryHashMap.remove(key);               //Remove the object from the Map
         }
+
         return inventory;
     }
 
@@ -296,12 +299,15 @@ public class Game {
      * @return It returns a Drop object, which is the drop in the cell
      */
     public Drops goblinLookForDrops(int[] goblinPosition,HashMap<Integer, Drops> dropsHashMap){
+
         Drops drop = null;
         int key = Integer.parseInt(goblinPosition[0]+""+goblinPosition[1]);
-        if(dropsHashMap.containsKey(key)){
-            drop = dropsHashMap.get(key);
-            dropsHashMap.remove(key);
+
+        if(dropsHashMap.containsKey(key)){      //Is there a drop in the cell, Find that my checking the key in the Hash Map
+            drop = dropsHashMap.get(key);       //If there is a drop, take the chest by saving the object in the treasureChest variable
+            dropsHashMap.remove(key);           //Remove the object from the Map
         }
+
         return drop;
     }
 
@@ -316,13 +322,13 @@ public class Game {
     public int[] getNumberOfCharacters(int[] gridSize){
 
         int[] numOfCharacters = new int[2];
-        int hVal, gVal;
-        hVal = (int)((gridSize[0]*gridSize[1])*0.3);
+        int hVal = (int)((gridSize[0]*gridSize[1])*0.3);
+        int gVal = (int)((gridSize[0]*gridSize[1])*0.3);
+
         message("Enter the number of humans between 1 and " + hVal);
-        numOfCharacters[0] = getNumber(hVal);
-        gVal = (int)((gridSize[0]*gridSize[1])*0.3);
+        numOfCharacters[0] = getNumber(hVal);                               //GetNumber gets the number of humans
         message("Enter the number of goblins between 1 and " + gVal);
-        numOfCharacters[1] = getNumber(gVal);
+        numOfCharacters[1] = getNumber(gVal);                               //GetNumber gets the number of goblins here
 
         return numOfCharacters;
     }
@@ -339,11 +345,11 @@ public class Game {
 
         int totalCharacters = numOfCharacters[0]+numOfCharacters[1];
         int[][] positions = new int[totalCharacters][2];
-        int[] rawPos = Stream.generate(Math::random).mapToInt(x -> (int)Math.floor(x*100)).filter(x ->(x >= 10 & x < gridSize[0]*10)).filter(x->(x%10) < gridSize[1]).distinct().limit(totalCharacters).toArray();
+        int[] rawPos = Stream.generate(Math::random).mapToInt(x -> (int)Math.floor(x*100)).filter(x ->(x >= 10 & x < gridSize[0]*10)).filter(x->(x%10) < gridSize[1]).distinct().limit(totalCharacters).toArray(); //Generate a set of random numbers that will be used as the keys and the first digit will be the X coordinate and the second digit will be the Y coordinate
 
-        for(int i = 0; i < totalCharacters; i++){
-            positions[i][0] = (int)Math.floor(rawPos[i]/10);
-            positions[i][1] = rawPos[i]%10;
+        for(int i = 0; i < totalCharacters; i++){            //Iterate through all the characters
+            positions[i][0] = (int)Math.floor(rawPos[i]/10); //for each set the x coordinate as the first digit
+            positions[i][1] = rawPos[i]%10;                  //for each set the y coordinate as the second digit
         }
 
         return positions;
@@ -356,9 +362,10 @@ public class Game {
      */
     public HashMap<Integer, Inventory> getInventory(int[] gridSize){
         HashMap<Integer, Inventory> inventoryMap =  new HashMap<>();
-        int[] arr = Stream.generate(Math::random).mapToInt(i -> (int)(Math.floor(i*99))).filter(x ->(x >= 10 & x < gridSize[0]*10)).distinct().filter(i ->(i%10) < gridSize[1]).limit((long)(0.1*gridSize[0]*gridSize[1])).toArray();
+        int[] arr = Stream.generate(Math::random).mapToInt(i -> (int)(Math.floor(i*99))).filter(x ->(x >= 10 & x < gridSize[0]*10)).distinct().filter(i ->(i%10) < gridSize[1]).limit((long)(0.1*gridSize[0]*gridSize[1])).toArray();//Generate a set of random numbers that will be used as the keys and the first digit will be the X coordinate and the second digit will be the Y coordinate
+
         for(int i : arr){
-            inventoryMap.put(i,new Inventory((i/10),(i%10)));
+            inventoryMap.put(i,new Inventory((i/10),(i%10)));   // Add the new coordinate to the inventory map
         }
         return inventoryMap;
     }
@@ -369,13 +376,16 @@ public class Game {
      * @return returns the HashMap of the Drops where the Key is the XcoorinateYcoordinate and the Key is the Inventory object
      */
     public HashMap<Integer, Drops> getDrops(int[] gridSize){
+
         HashMap<Integer, Drops> dropsHashMap =  new HashMap<>();
-        int[] arr = Stream.generate(Math::random).mapToInt(i -> (int)(Math.floor(i*99))).filter(x ->(x >= 10 & x < gridSize[0]*10)).distinct().filter(i ->(i%10) < gridSize[1]).limit((long)(0.1*gridSize[0]*gridSize[1])).toArray();
+        int[] arr = Stream.generate(Math::random).mapToInt(i -> (int)(Math.floor(i*99))).filter(x ->(x >= 10 & x < gridSize[0]*10)).distinct().filter(i ->(i%10) < gridSize[1]).limit((long)(0.1*gridSize[0]*gridSize[1])).toArray();//Generate a set of random numbers that will be used as the keys and the first digit will be the X coordinate and the second digit will be the Y coordinate
+
         for(int i : arr){
-            dropsHashMap.put(i,new Drops((i/10),(i%10)));
+            dropsHashMap.put(i,new Drops((i/10),(i%10)));//Add the coordinate to the dropsHashMap
         }
         return dropsHashMap;
     }
+
     /******
      * GetHumans creates an array of humans using the available grid spaces
      *
@@ -386,28 +396,34 @@ public class Game {
         Human[] human = new Human[hVal];
 
         for(int i = 0; i < hVal; i++)
-            human[i] = new Human(position[i][0],position[i][1]);
+            human[i] = new Human(position[i][0],position[i][1]);//add the positions from the position array to the humans array
 
         return human;
     }
+
     /******
      * Combat takes in the human and goblin and uses the math.random to decide who is the attacker
      *
      */
     public HashMap<Integer, TreasureChest> combat(Human human, Goblin goblin, Land land,HashMap<Integer, TreasureChest> treasureChestHashMap ){
+
         boolean humanAttack = true;
-        if(Math.random() < 0.5)
+
+        if(Math.random() < 0.5)                 //If the randomly generated number is ;ess than 0.5 then Goblins will attack or else humans attack
             humanAttack = false;
-        if(humanAttack)
-            goblin = human.attackGoblin(goblin);
-        else
-            human = goblin.attackHuman(human);
-        if(human.getHealth() <=0 )
-            land.setGridMatrixValue(human.getPosition(),0);
-        if(goblin.getHealth() <=0 ) {
-            land.setGridMatrixValue(goblin.getPosition(), 0);
+
+        if(humanAttack)                         //If humans are supposed to attack
+            goblin = human.attackGoblin(goblin);//Call attackGoblin method passing the goblin object which will return a modified goblin object
+        else                                    //If goblins are supposed to attack
+            human = goblin.attackHuman(human);  //Call attackHuman method passing the human object which will return a modified human object
+
+        if(human.getHealth() <=0 )                                  //If human is dead that is the health is less or equal to 0
+            land.setGridMatrixValue(human.getPosition(),0);   //Update the GridMatrix value to 0
+        if(goblin.getHealth() <=0 ) {                               //If Goblin is dead that is the health is less than or equal to 0
+            land.setGridMatrixValue(goblin.getPosition(), 0); //Update the GridMatrix value to 0
         }
-        treasureChestHashMap = generateTreasureChest(treasureChestHashMap, land.getGridSize());
+        treasureChestHashMap = generateTreasureChest(treasureChestHashMap, land.getGridSize());//Generate a treasure chest object and add to the treasureChestHashMap
+
         return treasureChestHashMap;
     }
 
@@ -417,13 +433,16 @@ public class Game {
      */
     public HashMap<Integer, TreasureChest> generateTreasureChest(HashMap<Integer, TreasureChest> treasureChestHashMap, int[] gridSize){
         int positionX, positionY, key;
+
         positionX = (int)(Math.floor(Math.random()*gridSize[0]));
         positionY = (int)(Math.floor(Math.random()*gridSize[1]));
         key = Integer.parseInt(positionX+""+positionY);
-        if(treasureChestHashMap.containsKey(key))
-            treasureChestHashMap.get(key).setPoints(treasureChestHashMap.get(key).getPoints()+100);
-        else
-            treasureChestHashMap.put(Integer.parseInt(positionX+""+positionY), new TreasureChest(100,positionX,positionY));
+
+        if(treasureChestHashMap.containsKey(key))                                                   //If the treasure map contains the key
+            treasureChestHashMap.get(key).setPoints(treasureChestHashMap.get(key).getPoints()+100); //Update the number of points
+        else                                                                                        //If the treasure map does not contain the key
+            treasureChestHashMap.put(key, new TreasureChest(100,positionX,positionY));        //Add key value pair to the map
+
         return treasureChestHashMap;
     }
 
@@ -436,8 +455,8 @@ public class Game {
 
         Goblin[] goblins = new Goblin[numOfCharacters[1]];
 
-        for(int i = 0; i < numOfCharacters[1]; i++)
-            goblins[i] = new Goblin(position[i+numOfCharacters[0]][0],position[i+numOfCharacters[0]][1]);
+        for(int i = 0; i < numOfCharacters[1]; i++)         //Iterate the loop
+            goblins[i] = new Goblin(position[i+numOfCharacters[0]][0],position[i+numOfCharacters[0]][1]);//Add positions to the Goblins array from the positions array
 
         return goblins;
     }
@@ -464,15 +483,6 @@ public class Game {
     }
 
     /******
-     * Set spacing for new page
-     *
-     *
-     */
-    public void newPage(){
-        message("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    }
-
-    /******
      * chooseGridSize method asks the uer to set the gird size between 1 and 20.
      *
      * @param  - x        -int     Contains the X value for the grid size
@@ -484,7 +494,6 @@ public class Game {
         int  x, y;
         Land land;
 
-      //  newPage();
         message("**********************************************************");
         message("*                                                        *");
         message("*      C H O O S E   T H E   G R I D   S I Z E           *");
@@ -494,7 +503,7 @@ public class Game {
         x = getNumber(10);
         message("                Choose y between 1 and 10:                ");
         y = getNumber(10);
-        land = new Land(x,y);
+        land = new Land(x,y);           //create a new Land Object
 
         return land;
     }
@@ -509,12 +518,13 @@ public class Game {
     public int getNumber(int limit){
         String input;
         int val;
+
         while(true) {
             input = scan.next();
             try {
-                val = Integer.parseInt(input);
-                if (1 <= val & val <= limit)
-                    return val;
+                val = Integer.parseInt(input); //If the input is not an integer it will throw an exception that will be caught
+                if (1 <= val & val <= limit)   // if the value is between 1 and the limit
+                    return val;                //Return the value
                 else
                     message("The value has to between 1 and " + limit);
                 message("Please Try again ");
@@ -531,11 +541,14 @@ public class Game {
      * @param -count -integer varaiable that stores the no of living humans
      */
     public int noOfHumans(Human[] humans){
+
         int count = 0;
-        for(Human human:humans){
-            if(!human.isDead())
-                count++;
+
+        for(Human human:humans){//Iterate through the list of humans
+            if(!human.isDead()) //If the human is not dead
+                count++;        //add one to the count
         }
+
         return count;
     }
 
@@ -545,38 +558,43 @@ public class Game {
      * @param -count -integer varaiable that stores the no of living humans
      */
     public int noOfGoblins(Goblin[] goblins){
+
         int count = 0;
-        for(Goblin goblin: goblins){
-            if(!goblin.isDead())
-                count++;
+
+        for(Goblin goblin: goblins){ //Iterate through the goblins array
+            if(!goblin.isDead())     //If the goblin is not dead
+                count++;             //Increatment the counter
         }
+
         return count;
     }
+
     /***************
      * correctInput method takes the input type, the input criteria and the input and returns a boolean value if the
      * input is correct
+     *
      */
     public boolean correctInput(String inputType, String input, String ...criteria){
         String result = "";
 
-        if(inputType == "int"){
+        if(inputType == "int"){//of the input type is supposed to be integer
             try{
-
+                //if the integer is within the range supplied
                 if(Integer.parseInt(input) >= Integer.parseInt(criteria[0]) && Integer.parseInt(input) <= Integer.parseInt(criteria[1])){
                     return true;
                 }
-                else{
+                else{//If it is an integer but not within the range
                     System.out.println("This is outside the range "+ criteria[0] + criteria[1]);
                 }
             }
-            catch(Exception e){
+            catch(Exception e){//If the input that is supposed to be an Integer, but it is not an integer
                 System.out.println("This is not a number. Please try again and enter a  number in the range "+criteria[0] +" ,"+ criteria[1]);
                 return false;
             }
         }
-        else if(inputType == "String"){
-            for(String str: criteria){
-                if(input.contains(str)){
+        else if(inputType == "String"){  //If the input is supposed to be a String
+            for(String str: criteria){   //Loop through the criteria array
+                if(input.contains(str)){ //Check if the criteria is contained in the input
                     return  true;
                 }
             }
@@ -592,13 +610,10 @@ public class Game {
      * Message method prints all the messages that would be used, using a switch case
      *
      */
-    public void message(String ...msg){
-        String print;
-        switch (msg[0]){
-            default:
-                print = msg[0];
-                break;
-        }
+    public void message(String msg){ //Print all the messages
+
+        String print = msg;
+
         System.out.println(print);
     }
 }

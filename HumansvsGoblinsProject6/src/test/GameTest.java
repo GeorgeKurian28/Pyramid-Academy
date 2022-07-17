@@ -9,14 +9,84 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameTest {
 
     Game game;
+    Goblin goblin1;
+    Goblin goblin2;
+    Goblin goblin3;
+    Goblin goblin4;
+    Human human1;
+    Human human2;
+    Human human3;
+    Human human4;
+    Land land;
+
     @BeforeEach
     void setUp() {
         game = new Game();
+        goblin1 = new Goblin(5,4);
+        goblin2 = new Goblin(1,4);
+        goblin3 = new Goblin(2,3);
+        goblin4 = new Goblin(3,2);
+        human1  = new Human (7,7);
+        human2  = new Human (4,4);
+        human3  = new Human (2,5);
+        human4  = new Human (1,5);
     }
 
     @Test
-    void getInventory() {
+    void getHumans(){
+        int[][] position = {{7,7},{4,4},{2,5},{6,8},{5,4},{1,4},{2,3},{3,2}};
+        assertEquals(5,game.getHumans(4,position)[0].getiD());
+        assertEquals(human1.getPosition()[0],game.getHumans(4,position)[0].getPosition()[0]);
+    }
 
+    @Test
+    void combat(){
+        land = new Land(10,10);
+        HashMap<Integer,TreasureChest> treasureChestHashMap = new HashMap<>();
+        assertTrue(treasureChestHashMap.isEmpty());
+        assertFalse(game.combat(human4,goblin2,land,treasureChestHashMap).isEmpty());
+    }
+
+    @Test
+    void generateTreasureChest(){
+        int[] gridSize = {10,10};
+        HashMap<Integer,TreasureChest> treasureChestHashMap = new HashMap<>();
+        assertTrue(treasureChestHashMap.isEmpty());
+        assertFalse(game.generateTreasureChest(treasureChestHashMap,gridSize).isEmpty());
+    }
+
+    @Test
+    void getGoblines(){
+        int[][] position = {{7,7},{4,4},{2,5},{6,8},{5,4},{1,4},{2,3},{3,2}};
+        int[] numOfCharacters = {4,4};
+        assertEquals(5,game.getGoblines(numOfCharacters,position)[0].getiD());
+        assertEquals(goblin1.getPosition()[0],game.getGoblines(numOfCharacters,position)[0].getPosition()[0]);
+    }
+
+    @Test
+    void noOfHumans(){
+        Human[] humans = {human1, human2, human3, human4};
+        assertEquals(4, game.noOfHumans(humans));
+        human4.setHealth(0);
+        assertEquals(3,game.noOfHumans(humans));
+    }
+
+
+    @Test
+    void noOfGoblins(){
+        Goblin[] goblins = {goblin1,goblin2,goblin3,goblin4};
+        assertEquals(4, game.noOfGoblins(goblins));
+        goblin1.setHealth(0);
+        assertEquals(3,game.noOfGoblins(goblins));
+    }
+
+    @Test
+    void correctInput() {
+        assertTrue(game.correctInput("String", "Grenade","Grenade","Gun"));
+        assertTrue(game.correctInput("int", "5","0","10"));
+        assertFalse(game.correctInput("String", "Apple","Grenade","Gun"));
+        assertFalse(game.correctInput("int", "15","0","10"));
+        assertFalse(game.correctInput("int", "-1","0","10"));
     }
 
     @AfterEach
