@@ -4,61 +4,81 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Game {
+    /******
+     * The Game Class is where the game is played
+     */
     Scanner scan = new Scanner(System.in);
-/*
+
+    /**************
+     * THe main method only calls the game method using an instance of the game class
+     *
+     * @param args
+     */
     public static void main(String ...args){
        Game game = new Game();
         game.game();
-    }*/
+    }
+
+    /**************************
+     * THe game method doesnot take any arguments and doesnot return any variables
+     *
+     * @param -humans                -The humans array stores all the human objects for the game in an array
+     * @param -goblins               -The goblins array stores all the goblin objects for the game in an array
+     * @param -positions             -The positions array stores all the random position in the gridmatrix
+     * @param -numberOfCharacters    -The numberOfCharacters stores the max number of goblins and humans that can be entered for a given grid size
+     * @param -inventoryHashMap      -The inventoryHashMap  is a Hash Map that stores the inventory objects that are randomly created on the grid
+     * @param -dropsHashMap          -The dropsHashMap is a Hash Map that stores the drops objects that are randomly created on the grid
+     * @param -treasureChestHashMap  -The treasurecHestHashMap is a Hash Map that stores the treasure chests that are added to the grid
+     * @param -land                  -The land is the Land object that is used for this game
+     */
     public void game(){
+
         Human[] humans;
         Goblin[] goblins;
         int[][] positions;
         int[] numberOfCharacters;
         HashMap<Integer,Inventory> inventoryHashMap;
         HashMap<Integer, Drops> dropsHashMap;
-        HashMap<Integer,TreasureChest> treasureChestHashMap;
+        HashMap<Integer,TreasureChest> treasureChestHashMap = new HashMap<>(); ;
         Land land;
-        welcome();
-        land = chooseGridSize();
-        land.createGridMatrix();
-        numberOfCharacters = getNumberOfCharacters(land.getGridSize());//Get number of humans and Goblins and pass that number to
+
+        welcome();              //Call the Welcome method that will welcome user to the game
+        land = chooseGridSize();//Call the method to choose the Grid Size to be used for the game
+        land.createGridMatrix();//Call the method in land that creates teh Grid
+        numberOfCharacters = getNumberOfCharacters(land.getGridSize());//Get number of humans and Goblins and pass that number to the number of Characters variable
+
         positions = getThePositionOfCharacters(numberOfCharacters,land.getGridSize());//Generate the positions of the characters;
+        humans = getHumans(numberOfCharacters[0],positions);                          //Using the number from the numberOFCharacters choose the first set of positions and create the array of human objects and store it in the humans array
+        goblins = getGoblines(numberOfCharacters,positions);                          //Using the number from the numberOFCharacters choose the first set of positions and create the array of goblin objects and store it in the goblins array
+        inventoryHashMap = getInventory(land.getGridSize());                          //Using the grid size of the land create a HashMap if Inventory objects and store in inventoryHashMap
+        dropsHashMap = getDrops(land.getGridSize());                                  //Using the grid size of the land create a HashMap if drops objects and store in dropsHashMap
 
-        //Get Humans and get Goblins with the array of positions as parameters
-        humans = getHumans(numberOfCharacters[0],positions);
-        goblins = getGoblines(numberOfCharacters,positions);
-        inventoryHashMap = getInventory(land.getGridSize());
-        dropsHashMap = getDrops(land.getGridSize());
-        treasureChestHashMap = new HashMap<>();
-
-        while( noOfHumans(humans)> 0 & noOfGoblins(goblins)>0){
-            land.setGridMatrix(goblins, humans);
-            land.setGrid(goblins, humans,inventoryHashMap,dropsHashMap,treasureChestHashMap);
-            System.out.println(land);
-            message("The total number of points "+humans[0].getPoints());
-            humanPlayerTurn(humans, land, goblins,inventoryHashMap, treasureChestHashMap);//human turn
-            //land.setGridMatrix(goblins, humans);//update all the new positions to the gridmatrix//IT IS ALREADY UPDATED IN THE HUMANS SIDE
-            goblinTurn(humans, goblins, land, dropsHashMap, treasureChestHashMap);//goblin move(human position)
-            //attack if close by
+        while( noOfHumans(humans)> 0 & noOfGoblins(goblins)>0){//The loop runs as long as we have humans and goblins
+            land.setGridMatrix(goblins, humans);                //put the humans and goblins on the gridMatrix variable (2D int array) in the land class
+            land.setGrid(goblins, humans,inventoryHashMap,dropsHashMap,treasureChestHashMap);//update the grid String variable with the humans, goblins, inventory,drops and treasture chest
+            System.out.println(land);                           //print the land object which will print the grid
+            message("The total number of points scored by humans  -"+humans[0].getPoints());//print the total number of points scored by humans
+            humanPlayerTurn(humans, land, goblins,inventoryHashMap, treasureChestHashMap);//human turn to play
+            goblinTurn(humans, goblins, land, dropsHashMap, treasureChestHashMap);//goblin Turn to play
         }
-        if(noOfHumans(humans) > 0)
+
+        if(noOfHumans(humans) > 0)//If only humans are left
             message("!!!!!!!  HUMANS WON  !!!!!!");
-        else
+        else                      //If only goblins ae left
             message("€€€€€€€  GOBLINS won  €€€€€€€");
     }
 
     /******
      * goblinTurn takes the array of humans and array of goblins and the land (grid they are on) and based on the proximity the goblins chase the humans
      *
-     *
+     * @return reutrns the hasmap of the treasure chest that comes out of the combat
      */
     public HashMap<Integer, TreasureChest> goblinTurn(Human[] humans,Goblin[] goblins, Land land, HashMap<Integer, Drops> dropsHashMap, HashMap<Integer, TreasureChest> treasureChestHashMap){
-        for (Goblin goblin:goblins) {
-            if(!goblin.isDead())
-             treasureChestHashMap = goblinMove(goblin.getPrey(humans, land),goblin,land, dropsHashMap, treasureChestHashMap);
+        for (Goblin goblin:goblins) {   //Run through all the goblins in the array
+            if(!goblin.isDead())        //If goblins are not dead
+             treasureChestHashMap = goblinMove(goblin.getPrey(humans, land),goblin,land, dropsHashMap, treasureChestHashMap);// call the Goblin move if the goblin is alive
         }
-        return treasureChestHashMap;
+        return treasureChestHashMap;    //return the treasure chest map
     }
 
     /******
@@ -70,6 +90,7 @@ public class Game {
      * @param -gPos   -int[] This Integer array stores the postion of the goblin
      * @param -x      -int stores the difference between the x coordinates of the goblin and human
      * @param -y      -int stores the difference between the y coordinates of the goblin and human
+     * @return the Hashmap of the treasure chest
      */
     public HashMap<Integer, TreasureChest> goblinMove(Human human, Goblin goblin, Land land, HashMap<Integer, Drops> dropsHashMap, HashMap<Integer, TreasureChest> treasureChestHashMap){
 
@@ -80,14 +101,15 @@ public class Game {
         Drops drops;
 
         drops = goblinLookForDrops(gPos, dropsHashMap);//Goblin looks for drops if it finds drops
-        if(drops != null)
-            goblin.takeDrops(drops.getNum());//It takes the drops
+
+        if(drops != null)//If there are drops in the cell
+            goblin.takeDrops(drops.getNum());//goblin takes the drops
 
         //Check to see the direction of the human from the goblin
-        if((x == 0 || y == 0) & (Math.abs(x) == 1 || Math.abs(y) == 1)) {      //We do that by comapring the x and y cooridnates
+        if((x == 0 || y == 0) & (Math.abs(x) == 1 || Math.abs(y) == 1)) {            //If the goblins are either in the same column or the same row and human is on the column or row beside the goblin
             treasureChestHashMap = combat(human, goblin, land, treasureChestHashMap);// it either x or y is same call combat()
         }
-        else if(x != 0 & ((Math.abs(x) > Math.abs(y)))){ // if they are not same then change the x or the y value in that direction
+        else if(x != 0 & ((Math.abs(x) > Math.abs(y)))){                             // if they are not same then change the x or the y value in that direction
             if( x < 0 )
                 gPos[0] += 1;
             else
@@ -100,14 +122,13 @@ public class Game {
                 gPos[1] -= 1;
         }
 
-        if(land.getGridMatrix()[gPos[0]][gPos[1]] == 0) {//CHECK GOBLIN FOR ERROS OF OVERLAP
-            land.setGridMatrixValue(goblin.getPosition(),0);
-            goblin.setPosition(gPos[0], gPos[1], land.getGridSize());
-            land.setGridMatrixValue(goblin.getPosition(),goblin.getiD()+200);
-            //System.out.println(goblin);TO BE REMOVED
+        if(land.getGridMatrix()[gPos[0]][gPos[1]] == 0) {// Only if there is no character in the grid cell
+            land.setGridMatrixValue(goblin.getPosition(),0);//Update the gridMatrix position to 0
+            goblin.setPosition(gPos[0], gPos[1], land.getGridSize());//Update the postion of the goblin to this new position
+            land.setGridMatrixValue(goblin.getPosition(),goblin.getiD()+200);//Update the gridMatrix position to 200+goblin Id
         }
 
-        return treasureChestHashMap;
+        return treasureChestHashMap;//Return the chest map
     }
 
     /******
@@ -116,27 +137,30 @@ public class Game {
      * @param -input   -String that stores the user choice should be(n/s/e/w) or else player losses turn
      */
     public void humanPlayerTurn(Human[] human, Land land, Goblin[] goblin, HashMap<Integer, Inventory> inventoryHashMap, HashMap<Integer, TreasureChest> treasureChestHashMap){
+
         String input = "";
         boolean validInput = false;
-        for(Human h:human){
-            if(!h.isDead()){
-                message("Player " + h.getiD() + " this is your turn to move choose (n/s/e/w)");
-                while (!validInput) {
-                    input = scan.next();
-                    validInput = correctInput("String",input,"n","N","s","S","e","E","w","W");
+
+        for(Human h:human){             // Loop through all the humans
+            if(!h.isDead()){            // If the human is alove
+                message("Player " + h.getiD() + " this is your turn to move choose (n/s/e/w)");//request player input for the human
+                while (!validInput) {   // If the input is not valid
+                    input = scan.next();// ask for anohter input
+                    validInput = correctInput("String",input,"n","N","s","S","e","E","w","W");//validate the input
                 }
-                validInput = false;
-                treasureChestHashMap = humanMove(input,h,land, goblin, inventoryHashMap, treasureChestHashMap);
-                if(h.hasWeaponInHand())
+                validInput = false;     //rest the boolean to galse
+                treasureChestHashMap = humanMove(input,h,land, goblin, inventoryHashMap, treasureChestHashMap);//update the treasure chest after human move
+
+                if(h.hasWeaponInHand()) //If the human has weapon in hand
                     message("Your Weapon"+h.getWeaponInHand());
-                if(wantToUseWeapon(h)){
+                if(wantToUseWeapon(h)){ //If they want to change or use a weapon when they never had to start with
                     message("Enter the weapon name from the following list you have in stock");
-                    message(h.getWeaponInStock().toString());
-                    while(!validInput){
+                    message(h.getWeaponInStock().toString()); //Show all the weapons in stock
+                    while(!validInput){  //If the input is not valid continue asking for an input
                         input = scan.next();
-                        validInput = correctInput("String",input,h.getWeaponInStock().keySet().toArray(new String [0]));
+                        validInput = correctInput("String",input,h.getWeaponInStock().keySet().toArray(new String [0]));//validate the  input
                     }validInput = false;
-                    h.useWeapon(input);
+                    h.useWeapon(input);  //If the input is correct use the weapon
                 }
             }
         }
@@ -149,10 +173,12 @@ public class Game {
      * @param -newPos    -int[] This stores the new x and y position of human
      */
     public boolean wantToUseWeapon(Human human){
+        
         boolean decision = false;
         String choice = "";
         boolean validInput = false;
-        //if the human has weapon
+
+
         if(human.hasWeaponInStock()){ // then ask if wants to use
             if(human.hasWeaponInHand()){
                 message("Do you want to change your weapon (Y/N) ");
