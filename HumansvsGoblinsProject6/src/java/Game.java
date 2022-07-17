@@ -5,11 +5,11 @@ import java.util.stream.Stream;
 
 public class Game {
     Scanner scan = new Scanner(System.in);
-
+/*
     public static void main(String ...args){
-        Game game = new Game();
+       Game game = new Game();
         game.game();
-    }
+    }*/
     public void game(){
         Human[] humans;
         Goblin[] goblins;
