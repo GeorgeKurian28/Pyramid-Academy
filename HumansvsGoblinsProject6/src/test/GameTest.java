@@ -18,6 +18,11 @@ class GameTest {
     Human human3;
     Human human4;
     Land land;
+    Inventory inventory1;
+    Inventory inventory2;
+    Inventory inventory3;
+    HashMap<Integer,Inventory> inventoryHashMap = new HashMap<>();
+    HashMap<Integer,TreasureChest> treasureChestHashMap = new HashMap<>();
 
     @BeforeEach
     void setUp() {
@@ -30,12 +35,35 @@ class GameTest {
         human2  = new Human (4,4);
         human3  = new Human (2,5);
         human4  = new Human (1,5);
+        inventory1 = new Inventory(7,7);
+        inventory2 = new Inventory(4,4);
+        inventory3 = new Inventory(2,5);
+    }
+
+    @Test
+    void getGoblines(){
+        int[][] position = {{7,7},{4,4},{2,5},{6,8},{5,4},{1,4},{2,3},{3,2}};
+        int[] numOfCharacters = {4,4};
+        assertEquals(goblin2.getPosition()[1],game.getGoblines(numOfCharacters,position)[1].getPosition()[1]);
+        assertEquals(goblin1.getPosition()[0],game.getGoblines(numOfCharacters,position)[0].getPosition()[0]);
+    }
+
+    @Test
+    void humanLookForInventory(){
+        inventoryHashMap.put(77,inventory1);
+        assertEquals(inventory1,game.humanLookForInventory(human1.getPosition(),inventoryHashMap));
+        assertEquals(null,game.humanLookForInventory(human2.getPosition(),inventoryHashMap));
+        inventoryHashMap.put(44,inventory2);
+        assertEquals(inventory2,game.humanLookForInventory(human2.getPosition(),inventoryHashMap));
+        inventoryHashMap.put(25,inventory3);
+        assertEquals(null,game.humanLookForInventory(human4.getPosition(),inventoryHashMap));
+
     }
 
     @Test
     void getHumans(){
         int[][] position = {{7,7},{4,4},{2,5},{6,8},{5,4},{1,4},{2,3},{3,2}};
-        assertEquals(5,game.getHumans(4,position)[0].getiD());
+        assertEquals(human2.getPosition()[1],game.getHumans(4,position)[1].getPosition()[1]);
         assertEquals(human1.getPosition()[0],game.getHumans(4,position)[0].getPosition()[0]);
     }
 
@@ -53,14 +81,6 @@ class GameTest {
         HashMap<Integer,TreasureChest> treasureChestHashMap = new HashMap<>();
         assertTrue(treasureChestHashMap.isEmpty());
         assertFalse(game.generateTreasureChest(treasureChestHashMap,gridSize).isEmpty());
-    }
-
-    @Test
-    void getGoblines(){
-        int[][] position = {{7,7},{4,4},{2,5},{6,8},{5,4},{1,4},{2,3},{3,2}};
-        int[] numOfCharacters = {4,4};
-        assertEquals(5,game.getGoblines(numOfCharacters,position)[0].getiD());
-        assertEquals(goblin1.getPosition()[0],game.getGoblines(numOfCharacters,position)[0].getPosition()[0]);
     }
 
     @Test
