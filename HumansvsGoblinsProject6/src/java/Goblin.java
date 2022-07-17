@@ -110,6 +110,11 @@ public class Goblin {
         return health;
     }
 
+    /**************
+     * takeDrops Method is for the goblin to take the drops in the goblin's current cell and update that to the health
+     *
+     * @param drops this is the parameter that is passed to the method
+     */
     public void takeDrops(int drops){
         this.setHealth(this.getHealth()+(drops*10));
     }
@@ -165,13 +170,6 @@ public class Goblin {
     public int getDistance(int[] humanPos, int[] goblinPos){
         return (int)(Math.sqrt( (humanPos[0]-goblinPos[0])*(humanPos[0]-goblinPos[0]) + (humanPos[1]-goblinPos[1])*(humanPos[1]-goblinPos[1]) ));
     }
-
-    /*************
-     * The getDrops method returns the number of drops available in the Goblin
-     *
-     * @return returns the integer value that is health/5
-     */
-    public int getDrops(){ return getHealth()/5; }
 
     @Override
     public String toString(){

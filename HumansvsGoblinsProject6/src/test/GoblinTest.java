@@ -85,6 +85,13 @@ class GoblinTest {
         assertEquals(12, goblin3.getDistance(humans[2].getPosition(), goblin3.getPosition()),"This should be 1");
     }
 
+    @Test
+    void takeDrops(){
+        assertEquals(100, goblin1.getHealth());
+        goblin1.takeDrops(10);
+        assertEquals(200,goblin1.getHealth());
+    }
+
     @AfterEach
     void tearDown() {
     }

@@ -2,6 +2,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class HumanTest {
@@ -9,6 +11,8 @@ class HumanTest {
     Human human2;
     Human human3;
     Goblin goblin;
+    Weapon weapon;
+    HashMap<String,Integer> weaponHashMap = new HashMap<>();
 
 
     @BeforeEach
@@ -17,6 +21,8 @@ class HumanTest {
         human2 = new Human(2,4,15);
         human3 = new Human(6,5,50,17);
         goblin = new Goblin(2,5,10);
+        weapon = new Weapon("Grenade",10);
+        weaponHashMap.put(weapon.getName(), weapon.getStrength());
     }
 
     @Test
@@ -61,6 +67,42 @@ class HumanTest {
         human1.setHealth(100);
         assertEquals(0,human1.getHealth(),"The human is dead so no health will bring him back");
     }
+
+    @Test
+    void getPoints(){
+        assertEquals(0,human1.getPoints(), "There are no points for this human1");
+        human1.setPoints(10);
+        assertEquals(10,human1.getPoints(), "The points for this human1 has been changed to 10");
+        human1.setPoints(-5);
+        assertEquals(10,human1.getPoints(), "The points cannot be negative");
+
+    }
+
+    @Test
+    void getWeaponsInStock(){
+
+        assertEquals("{}", human1.getWeaponInStock().toString(),"The stock is empty");
+        human1.takeWeapons(weaponHashMap);
+        assertEquals("{"+weapon.getName()+ "=" + weapon.getStrength() + "}",human1.getWeaponInStock().toString(),"Human1 took teh weapon");
+    }
+
+    @Test
+    void hasWeaponInStock(){
+        assertFalse(human2.hasWeaponInStock());
+        human2.takeWeapons(weaponHashMap);
+        assertTrue(human2.hasWeaponInStock());
+        human2.useWeapon(weapon.getName());
+        assertFalse(human2.hasWeaponInStock());
+    }
+
+    @Test
+    void hasWeaponInHand(){
+        assertFalse(human1.hasWeaponInHand());
+        human1.takeWeapons(weaponHashMap);
+        human1.useWeapon(weapon.getName());
+        assertTrue(human1.hasWeaponInHand());
+    }
+
 
     @AfterEach
     void tearDown() {

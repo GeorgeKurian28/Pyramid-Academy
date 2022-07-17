@@ -223,7 +223,8 @@ public class Human {
     }
 
     public void setPoints(int points) {
-        this.points = points;
+        if(points > 0)
+            this.points = points;
     }
 
     public int getPoints() {
