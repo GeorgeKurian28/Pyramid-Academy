@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"> <!-- bean definitions here -->
+        <context:component-scan base-package="org.example"/>
+
+        <bean id ="Student" class="org.example.Student">
+                <constructor-arg index = "0">
+                        <list>
+                                <ref bean ="Phone1"/>
+                                <ref bean= "Phone2"/>
+                        </list>
+                </constructor-arg>
+        </bean>
+        <bean id ="Phone1" class = "org.example.Phone">
+                <constructor-arg index="0" value="2342362"/>
+        </bean>
+        <bean id ="Phone2" class = "org.example.Phone">
+                <constructor-arg index="0" value="64856868"/>
+        </bean>
+</beans>
