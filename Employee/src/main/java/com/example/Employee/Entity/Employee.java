@@ -1,12 +1,23 @@
 package com.example.Employee.Entity;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "tblEmp")
 public class Employee {
+
+    @Id
+    @Column(name = "e_Id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int employeeID;
     private String employeeName;
     private String employeePhone;
 
-    public Employee(int employeeID, String employeeName, String employeePhone) {
-        this.employeeID = employeeID;
+    public Employee(){
+
+    }
+
+    public Employee( String employeeName, String employeePhone) {
         this.employeeName = employeeName;
         this.employeePhone = employeePhone;
     }

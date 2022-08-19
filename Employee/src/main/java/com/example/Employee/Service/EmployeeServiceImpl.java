@@ -1,65 +1,50 @@
 package com.example.Employee.Service;
 
+import com.example.Employee.DAO.EmployeeDAO;
 import com.example.Employee.Entity.Employee;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService{
-    private List<Employee> list;
 
-    public EmployeeServiceImpl() {
-        list = new ArrayList<>();
-        list.add(new Employee(101,"George Kurian","5463456789"));
-        list.add(new Employee(102,"Melvin Kurian","5863456789"));
-        list.add(new Employee(103,"Ryan Goslin","7893456789"));
-        list.add(new Employee(104,"Kate Simmer","5493456789"));
-    }
-
+    @Autowired
+    private EmployeeDAO employeeDAO;
     @Override
     public List<Employee> showAllEmployees() {
-        return list;
+        return this.employeeDAO.findAll();
     }
 
     @Override
     public Employee showEmployee(int employeeId) {
         Employee emp = null;
-        for(Employee e : list)
-            if(employeeId == e.getEmployeeID()){
-                emp =  e;
-                break;
-            }
+        Optional<Employee> opt = this.employeeDAO.findById(employeeId);
+        if(opt.isPresent()){
+            emp = opt.get();
+        }
+        else {
+            throw new RuntimeException("There is no employee with ID - "+ employeeId);
+        }
         return emp;
     }
 
     @Override
     public Employee addEmployee(Employee emp) {
-        list.add(emp);
-        return emp;
+        return this.employeeDAO.save(emp);
     }
 
     @Override
     public Employee updateEmployee(Employee emp) {
-        for(Employee e: list){
-            if(e.getEmployeeID() == emp.getEmployeeID()){
-                e.setEmployeeName(emp.getEmployeeName());
-                e.setEmployeePhone(emp.getEmployeePhone());
-                break;
-            }
-        }
-        return emp;
+        return this.employeeDAO.save(emp);
     }
 
     @Override
     public String removeEmployee(int employeeID) {
-        for(Employee e : list){
-            if(e.getEmployeeID() == employeeID){
-                list.remove(e);
-                break;
-            }
-        }
+        this.employeeDAO.deleteById(employeeID);
         return "Succesfully Removed";
     }
 }
