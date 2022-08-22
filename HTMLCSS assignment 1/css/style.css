@@ -1,0 +1,40 @@
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: rgb(143, 42, 42);
+  }
+  
+  li {
+    float: left;
+  }
+  
+  li a {
+    display: block;
+    color: rgb(226, 213, 213);
+    text-align: center;
+    padding: 14px ;
+    text-decoration: none;
+  }
+  
+  li a:hover:not(.active) {
+    background-color: #111;
+  }
+  
+  .active {
+    background-color: #1aaa04;
+  }
+
+  .column {
+    float: left;
+    width: 15%;
+    padding: 35px;
+  }
+
+  .row::after {
+    content: "        ";
+    clear: both;
+    display: table;
+    
+  }
